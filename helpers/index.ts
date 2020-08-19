@@ -1,4 +1,4 @@
-import { connect } from "../deps.ts";
+import { connect, Session } from "../deps.ts";
 import { ErrorWithConnection, ContextConnection } from "./types.ts";
 
 const createConnection = () => {
@@ -12,16 +12,15 @@ const createConnection = () => {
 
 const asyncWrapperWithConnection = (fn: Function) => {
   return async (ctx: ContextConnection, next?: () => Promise<void>) => {
-    const conn = await createConnection();
-    ctx.connection = conn;
+    ctx.connection = await createConnection();
     return fn(ctx, next)
       .then((response: any) => {
         ctx.response.status = response.status ? response.status : 200;
         ctx.response.body = response.data;
-        conn.close();
+        (ctx.connection as Session).close();
       })
       .catch((e: ErrorWithConnection) => {
-        conn && conn.close();
+        (ctx.connection as Session).close();
         e.isApi ? ctx.response.status = 400 : ctx.response.status = 500;
         ctx.response.body = { message: e.message };
       });
