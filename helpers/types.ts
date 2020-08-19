@@ -1,4 +1,4 @@
-import { Session, RouterContext } from "../deps.ts";
+import { Session, RouterContext, Context } from "../deps.ts";
 
 interface Company {
   id: string;
@@ -14,7 +14,7 @@ interface ErrorWithConnection extends Error {
   conn?: Session;
 }
 
-interface ContextConnection extends RouterContext {
+interface ContextConnection extends RouterContext<{ [key: string]: string }> {
   connection?: Session;
 }
 
