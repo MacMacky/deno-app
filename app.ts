@@ -1,4 +1,4 @@
-import Application from "./deps.ts";
+import { Application } from "./deps.ts";
 import company from "./routes/company.ts";
 
 const app: Application = new Application();
