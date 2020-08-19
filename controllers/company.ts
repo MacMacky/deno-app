@@ -1,64 +1,97 @@
-import { Context, Company, CompanyRequestBody, generateID } from "../deps.ts";
+import { Session, r } from "../deps.ts";
+import {
+  Company,
+  CompanyRequestBody,
+  ContextConnection,
+} from "../helpers/types.ts";
+import { DB } from "../helpers/index.ts";
 
-let data: Company[] = [];
-
-export const root = (ctx: Context) => {
-  ctx.response.body = { "message": "Hello World!" };
+export const root = async (ctx: ContextConnection) => {
+  const result = await r.db(DB).tableList().run(
+    ctx.connection as Session,
+  );
+  ctx.response.body = { "message": "Ok" };
 };
 
-export const getCompanies = (ctx: Context) => {
-  ctx.response.body = data;
+export const getCompanies = async (ctx: ContextConnection) => {
+  const companies = await r
+    .db(DB)
+    .table("company")
+    .run<Company>(ctx.connection as Session);
+
+  return { data: companies };
 };
 
-export const getCompany = (ctx: Context) => {
-  const company = data.find((o) => o.id === ctx.params.id);
+export const getCompany = async (ctx: ContextConnection) => {
+  const [company] = await r
+    .db(DB)
+    .table("company")
+    .get(ctx.params.id || "")
+    .run<Company>(ctx.connection as Session);
+
   if (!company) {
-    ctx.response.status = 400;
-    ctx.response.body = { message: "Company does not exists." };
-    return;
+    throw { message: "Company does not exists.", isApi: true };
   }
-  ctx.response.body = company;
+
+  return { data: company };
 };
 
-export const createCompany = async (ctx: Context) => {
+export const createCompany = async (ctx: ContextConnection) => {
   if (ctx.request.hasBody) {
     const company: CompanyRequestBody = await ctx.request.body(
       { type: "json" },
     ).value;
-    data.push({ ...company, id: generateID() });
+    await r.db("sample")
+      .table("company")
+      .insert(company)
+      .run(ctx.connection as Session);
   }
-  ctx.response.status = 201;
-  ctx.response.body = { created: true };
+
+  return { data: { created: true }, status: 201 };
 };
 
-export const updateCompany = async (ctx: Context) => {
-  const company = data.find((o) => o.id === ctx.params.id);
+export const updateCompany = async (ctx: ContextConnection) => {
+  const [company] = await r
+    .db(DB)
+    .table("company")
+    .get(ctx.params.id || "")
+    .run<Company>(ctx.connection as Session);
 
   if (!company) {
-    ctx.response.status = 400;
-    ctx.response.body = { message: "Company does not exists." };
-    return;
+    throw { message: "Company does not exists.", isApi: true };
   }
 
   if (ctx.request.hasBody) {
     const requestBody: CompanyRequestBody = await ctx.request.body(
       { type: "json" },
     ).value;
-    data = data.filter((o) => o.id !== ctx.params.id);
-    data.push({ ...company, ...requestBody, id: (ctx.params.id as string) });
+
+    await r.db(DB)
+      .table("company")
+      .get(ctx.params.id as string)
+      .update(requestBody)
+      .run(ctx.connection as Session);
   }
-  ctx.response.status = 201;
-  ctx.response.body = { updated: true };
+
+  return { data: { updated: true }, status: 201 };
 };
 
-export const deleteCompany = (ctx: Context) => {
-  const company = data.find((o) => o.id === ctx.params.id);
+export const deleteCompany = async (ctx: ContextConnection) => {
+  const [company] = await r
+    .db(DB)
+    .table("company")
+    .get(ctx.params.id || "")
+    .run<Company>(ctx.connection as Session);
+
   if (!company) {
-    ctx.response.status = 400;
-    ctx.response.body = { message: "Company does not exists." };
-    return;
+    throw { message: "Company does not exists.", isApi: true };
   }
-  data = data.filter((o) => o.id !== ctx.params.id);
-  ctx.response.status = 201;
-  ctx.response.body = { deleted: true };
+
+  await r.db(DB)
+    .table("company")
+    .get(ctx.params.id as string)
+    .delete()
+    .run(ctx.connection as Session);
+
+  return { data: { deleted: true }, status: 201 };
 };
