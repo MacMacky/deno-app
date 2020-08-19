@@ -14,12 +14,11 @@ const createDbAndTables = async (dbName: string, tables: string[]) => {
     let tableList: any[] = await r.db(dbName).tableList().run(conn);
     tableList = tableList[0];
     const tablesDoesNotExits = tables.filter((t) => !tableList.includes(t));
-    tablesDoesNotExits.forEach(async (table) => {
-      await r
-        .db(dbName)
-        .tableCreate(table)
-        .run(conn);
-    });
+    await Promise.all(
+      tablesDoesNotExits.map((table) =>
+        r.db(dbName).tableCreate(table).run(conn)
+      ),
+    );
   } catch (e) {
     console.error(e);
   }
