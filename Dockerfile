@@ -9,7 +9,7 @@ WORKDIR /app
 USER deno
 
 # Cache the dependencies as a layer (the following two steps are re-run only when deps.ts is modified).
-# Ideally fetch deps.ts will download and compile _all_ external files used in main.ts.
+# Ideally fetch deps.ts will download and compile _all_ external files used in the code
 COPY deps.ts .
 
 RUN deno cache deps.ts
@@ -18,7 +18,7 @@ RUN deno cache deps.ts
 ADD . .
 
 # Compile the main app so that it doesn't need to be compiled each startup/entry.
-RUN deno cache main.ts
+RUN deno cache server.ts
 
 # Run command with the following flags
-CMD ["deno","run","--allow-net","--allow-env","--allow-read", "main.ts"]
+CMD ["deno","run","--allow-net","--allow-env","--allow-read", "server.ts"]
