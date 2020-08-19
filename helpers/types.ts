@@ -1,4 +1,4 @@
-import { Session, RouterContext, Context } from "../deps.ts";
+import { Session, RouterContext } from "../deps.ts";
 
 interface Company {
   id: string;
