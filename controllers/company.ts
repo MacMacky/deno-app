@@ -26,7 +26,7 @@ export const getCompany = async (ctx: ContextConnection) => {
   const [company] = await r
     .db(DB)
     .table("company")
-    .get(ctx.params.id || "")
+    .get(ctx.params.id)
     .run<Company>(ctx.connection as Session);
 
   if (!company) {
@@ -41,7 +41,7 @@ export const createCompany = async (ctx: ContextConnection) => {
     const company: CompanyRequestBody = await ctx.request.body(
       { type: "json" },
     ).value;
-    await r.db("sample")
+    await r.db(DB)
       .table("company")
       .insert(company)
       .run(ctx.connection as Session);
@@ -54,7 +54,7 @@ export const updateCompany = async (ctx: ContextConnection) => {
   const [company] = await r
     .db(DB)
     .table("company")
-    .get(ctx.params.id || "")
+    .get(ctx.params.id)
     .run<Company>(ctx.connection as Session);
 
   if (!company) {
@@ -68,7 +68,7 @@ export const updateCompany = async (ctx: ContextConnection) => {
 
     await r.db(DB)
       .table("company")
-      .get(ctx.params.id as string)
+      .get(ctx.params.id)
       .update(requestBody)
       .run(ctx.connection as Session);
   }
@@ -80,7 +80,7 @@ export const deleteCompany = async (ctx: ContextConnection) => {
   const [company] = await r
     .db(DB)
     .table("company")
-    .get(ctx.params.id || "")
+    .get(ctx.params.id)
     .run<Company>(ctx.connection as Session);
 
   if (!company) {
@@ -89,7 +89,7 @@ export const deleteCompany = async (ctx: ContextConnection) => {
 
   await r.db(DB)
     .table("company")
-    .get(ctx.params.id as string)
+    .get(ctx.params.id)
     .delete()
     .run(ctx.connection as Session);
 
