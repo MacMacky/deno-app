@@ -10,7 +10,7 @@ export const root = async (ctx: ContextConnection) => {
   const result = await r.db(DB).tableList().run(
     ctx.connection as Session,
   );
-  ctx.response.body = { "message": "Ok" };
+  return { data: { "message": "Ok" } };
 };
 
 export const getCompanies = async (ctx: ContextConnection) => {
