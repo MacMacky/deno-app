@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  api:
+    build: .
+    env_file: .env
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    networks:
+      - app
+  db:
+    image: rethinkdb
+    ports:
+      - "8081:8080"
+    volumes:
+      - "/dna-dev/rethinkdb_data:/data"
+    networks:
+      - app
+
+networks:
+  app:
